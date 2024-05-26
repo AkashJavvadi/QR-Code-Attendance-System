@@ -36,27 +36,35 @@ elif(userinput=="1"):
   detector=cv2.QRCodeDetector()
   f=open("D:\\EH_Tools\\Student.csv","a")
   f.write("\n")
-  f.write("---------------------------------------------------------------------------------------------------------")
   f.write("\n\n")
   f.close()
   while True:
     _,img=cap.read()
     
-    data,one, _=detector.detectAndDecode(img)
+    data,bbox, _=detector.detectAndDecode(img)
     if(len(data)>1):
         if data in students:
           print(data+"-present")
           now=datetime.datetime.now()
           s=now.strftime("-Present    date: %d-%m-%y    time: %H:%M:%S " )
+          status_text = ""
           f=open("D:\\EH_Tools\\Student.csv","a")
           f.write( data+s)
           f.write("\n")
           f.close()
           students.remove(data)
+          status_text = f"{data} - Present"
         elif data in students2:
-          print(data+"-Already Present")
+          status_text = f"{data} - Already Present"
         else:
-          print("Student is Invalid")
+          status_text = "Student is Invalid"
+        if bbox is not None:
+                for i in range(len(bbox[0])):
+                    point1 = tuple(map(int, bbox[0][i]))
+                    point2 = tuple(map(int, bbox[0][(i + 1) % len(bbox[0])]))
+                    cv2.line(img, point1, point2, (255, 0, 0), 2)
+                
+                cv2.putText(img, status_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
     
     cv2.imshow('show your qr',img)
     if cv2.waitKey(500)==ord('q'):
